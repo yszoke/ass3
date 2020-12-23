@@ -10,10 +10,12 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
+from sklearn import metrics
 
 url = "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
-names = ['sepal-length', 'sepal-width', 'petal-length', 'petal-width', 'class']
-dataset = pandas.read_csv(url, names=names)
+names1 = ['sepal-length', 'sepal-width', 'petal-length', 'petal-width', 'class']
+features = ['sepal-length', 'sepal-width', 'petal-length', 'petal-width']
+dataset = pandas.read_csv(url, names=names1)
 # print(dataset.shape)
 # print(dataset.head(20))
 # print(dataset.describe())
@@ -67,4 +69,24 @@ predictions = knn.predict(X_validation)
 print(accuracy_score(Y_validation, predictions))
 print(confusion_matrix(Y_validation, predictions))
 print(classification_report(Y_validation, predictions))
+
+
+
+
+clf = DecisionTreeClassifier()
+clf.fit(X_train, Y_train)
+y_pred_test = clf.predict(X_validation)
+y_pred_train = clf.predict(X_train)
+
+# Prints train' accuracy
+accuracy = metrics.accuracy_score(y_pred_train, Y_train)
+print("Training accuracy : %s" % "{0:.3%}".format(accuracy))
+
+# Model test' accuracy, (how often is the classifier correct)
+print("DecisionTreeClassifier accuracy:", metrics.accuracy_score(Y_validation, y_pred_test) * 100, "%")
+
+# Create a series with features' importance:
+featimp = pandas.Series(clf.feature_importances_, index=features).sort_values(ascending=False)
+print(featimp)
+
 

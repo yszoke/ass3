@@ -1,5 +1,5 @@
 import nltk
-nltk.download("stopwords")
+# nltk.download("stopwords")
 from nltk.tokenize import word_tokenize
 import pandas as pd
 import numpy as np
@@ -8,10 +8,10 @@ from nltk.corpus import stopwords
 import re
 import sklearn
 from sklearn.model_selection import train_test_split
-nltk.download('punkt')
-nltk.download('sentiwordnet')
-nltk.download('averaged_perceptron_tagger')
-nltk.download('wordnet')
+# nltk.download('punkt')
+# nltk.download('sentiwordnet')
+# nltk.download('averaged_perceptron_tagger')
+# nltk.download('wordnet')
 from nltk.corpus import sentiwordnet as swn
 
 
