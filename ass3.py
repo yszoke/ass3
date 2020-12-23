@@ -1,5 +1,5 @@
 import nltk
-# nltk.download("stopwords")
+nltk.download("stopwords")
 from nltk.tokenize import word_tokenize
 import pandas as pd
 import numpy as np
@@ -8,17 +8,17 @@ from nltk.corpus import stopwords
 import re
 import sklearn
 from sklearn.model_selection import train_test_split
-# nltk.download('punkt')
-# nltk.download('sentiwordnet')
-# nltk.download('averaged_perceptron_tagger')
-# nltk.download('wordnet')
+nltk.download('punkt')
+nltk.download('sentiwordnet')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('wordnet')
 from nltk.corpus import sentiwordnet as swn
 
 
 
 def lower_case(tokens):
-    lower_case_tokens=[]
-    string_check= re.compile("[',@_!#$%.``^&*()<>?/\|}{""~:]")
+    lower_case_tokens = []
+    string_check = re.compile("[',@_!#$%.``^&*()<>?/\|}{""~:]")
     for token in tokens:
         lower_case_token=token[0].lower()
         if(string_check.search(lower_case_token)==None):
@@ -66,7 +66,7 @@ def stemming(tokens):
     return stemming_words
 
 
-corpus = pd.read_csv("Try.csv",encoding='latin-1')
+corpus = pd.read_csv("Train.csv",encoding='latin-1')
 x_train=corpus.SentimentText
 y_train = corpus.Sentiment
 
