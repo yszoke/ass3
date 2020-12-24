@@ -7,6 +7,7 @@ from nltk.stem import PorterStemmer
 from nltk.corpus import stopwords
 import re
 import sklearn
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 # nltk.download('punkt')
 # nltk.download('sentiwordnet')
@@ -65,32 +66,44 @@ def stemming(tokens):
         stemming_words.append([stemming_token,token[1]])
     return stemming_words
 
+def getData():
+    corpus = pd.read_csv("Train.csv",encoding='latin-1')
+    x_train=corpus.SentimentText
+    y_train = corpus.Sentiment
 
-corpus = pd.read_csv("Train.csv",encoding='latin-1')
-x_train=corpus.SentimentText
-y_train = corpus.Sentiment
+    sentiment_words_train={}
 
-sentiment_words_train={}
+    tokens_in_train_set=[]
+    table=[]
+    temp_table=[]
+    for cellX, cellY in zip(x_train,y_train):
+        cell_tokens= word_tokenize(cellX)
+        label=cellY
+        if label=="sentiment":
+            continue
+        words_in_cell=len(cell_tokens)
+        if label in sentiment_words_train:
+            sentiment_words_train[label]=sentiment_words_train[label]+words_in_cell
+        else:
+            sentiment_words_train[label]=words_in_cell
+        length= len(cell_tokens)
+        for word in cell_tokens[1:length]:
+            tokens_in_train_set.append((word,label))
+            temp_table.append(word)
+        bigrams_train = list(nltk.bigrams(cellX.split()))
+        for bigrm in bigrams_train:
+            word = bigrm[0]+" " +bigrm[1]
+            tokens_in_train_set.append((word,label))
+            temp_table.append(word)
+        table.append((temp_table,label))
+        temp_table=[]
 
-tokens_in_train_set=[]
-for cellX, cellY in zip(x_train,y_train):
-    cell_tokens= word_tokenize(cellX)
-    label=cellY
-    if label=="sentiment":
-        continue
-    words_in_cell=len(cell_tokens)
-    if label in sentiment_words_train:
-        sentiment_words_train[label]=sentiment_words_train[label]+words_in_cell
-    else:
-        sentiment_words_train[label]=words_in_cell
-    length= len(cell_tokens)
-    for word in cell_tokens[1:length]:
-        tokens_in_train_set.append((word,label))
-    bigrams_train = list(nltk.bigrams(cellX.split()))
-    for bigrm in bigrams_train:
-        word = bigrm[0]+" " +bigrm[1]
-        tokens_in_train_set.append((word,label))
+    clean_tokens_test=stemming(remove_stop_words(lower_case(tokens_in_train_set)))
+    print(clean_tokens_test[20:40])
+    print(sentiment_words_train)
 
+    # clean_table=stemming(remove_stop_words(lower_case(table)))
+    # print(clean_table[20:40])
 
-clean_tokens_test=stemming(remove_stop_words(lower_case(tokens_in_train_set)))
-print(clean_tokens_test[20:40])
+if __name__ == "__main__":
+    getData()
