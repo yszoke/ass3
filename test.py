@@ -37,32 +37,27 @@ import Preprocessing as pre
 def test():
     df = pd.read_csv('Train.csv',encoding='latin-1')
     df.groupby('Sentiment').SentimentText.count().plot.bar(ylim=0)
-    plt.show()
+    # plt.show()
 ################################################################
-    stemmer = PorterStemmer()
-    words = stopwords.words("english")
-    #
-    # df['processedtext'] = df['SentimentText'].apply(
-    #     lambda x: " ".join([stemmer.stem(i) for i in re.sub("[^a-zA-Z]", " ", x).split() if i not in words]).lower())
+
     df['processedtext'] = np.array(pre.getData(df['SentimentText'].array))
+    df['length'] = df['SentimentText'].str.len()
 
     target = df['Sentiment']
 ################################################################
     X_train, X_test, y_train, y_test = train_test_split(df['processedtext'], target, test_size=0.20, random_state=100)
 
-    # print("shape: ",df.shape);
-    # print("train shape: ",X_train.shape);
-    # print("test shape: ",X_test.shape)
 
     # vectorizer_tfidf = TfidfVectorizer(stop_words='english', max_df=0.7)
     # vectorizer_tfidf = CountVectorizer(analyzer='word')
-    vectorizer_tfidf = HashingVectorizer(analyzer='word')
+    vectorizer_tfidf = HashingVectorizer(analyzer='word',ngram_range=(1, 2))
 
 
     train_tfIdf = vectorizer_tfidf.fit_transform(X_train.values.astype('U'))
     test_tfIdf = vectorizer_tfidf.transform(X_test.values.astype('U'))
 
     # print("features names: ",vectorizer_tfidf.get_feature_names()[:10])
+
     print("train tf idf shape: ",train_tfIdf.shape)
     print("test tf idf shape: ",test_tfIdf.shape,"\n")
 
@@ -81,27 +76,27 @@ def test():
     from sklearn import metrics
     from sklearn.linear_model import Perceptron
 
-    # scoring = 'accuracy'
-    # seed = 7
-    # # 10 cross validation to check wich model to choose
-    #
-    # models = []
-    # models.append(('LR', LogisticRegression(solver='liblinear')))
-    # # models.append(('LDA', LinearDiscriminantAnalysis()))
-    # models.append(('KNN', KNeighborsClassifier()))
-    # models.append(('CART', DecisionTreeClassifier()))
-    # models.append(('NB', MultinomialNB()))
+    scoring = 'accuracy'
+    seed = 7
+    # 10 cross validation to check wich model to choose
+
+    models = []
+    # models.append(('NB', GaussianNB()))
     # models.append(('SVM', SVC()))
-    #
-    # results = []
-    # names = []
-    # for name, model in models:
-    #     kfold = model_selection.KFold(n_splits=10, random_state=None)
-    #     cv_results = model_selection.cross_val_score(model, train_tfIdf, y_train, cv=kfold, scoring=scoring)
-    #     results.append(cv_results)
-    #     names.append(name)
-    #     msg = "%s: %f (%f)" % (name, cv_results.mean(), cv_results.std())
-    #     print(msg)
+    models.append(('LR', LogisticRegression(solver='liblinear')))
+    # models.append(('LDA', LinearDiscriminantAnalysis()))
+    models.append(('KNN', KNeighborsClassifier()))
+    models.append(('CART', DecisionTreeClassifier()))
+
+    results = []
+    names = []
+    for name, model in models:
+        kfold = model_selection.KFold(n_splits=10, random_state=None)
+        cv_results = model_selection.cross_val_score(model, train_tfIdf, y_train, cv=kfold, scoring=scoring)
+        results.append(cv_results)
+        names.append(name)
+        msg = "%s: %f (%f)" % (name, cv_results.mean(), cv_results.std())
+        print(msg)
 
     ######################### NB ###########################
 
@@ -118,34 +113,34 @@ def test():
     # print(accuracy_tfidf)
 
     ######################### LR ###########################
-    print("LR:")
+    # print("LR:")
     lr_classifier = LogisticRegression(solver='liblinear')
-
-    lr_classifier.fit(train_tfIdf, y_train)
-
-
-    pred3 = lr_classifier.predict(test_tfIdf)
-    # print(pred2[:10])
-
-    # Calculate the accuracy score: score
-    accuracy_tfidf = metrics.accuracy_score(y_test, pred3)
-    print(accuracy_tfidf)
+    #
+    # lr_classifier.fit(train_tfIdf, y_train)
+    #
+    #
+    # pred3 = lr_classifier.predict(test_tfIdf)
+    # # print(pred2[:10])
+    #
+    # # Calculate the accuracy score: score
+    # accuracy_tfidf = metrics.accuracy_score(y_test, pred3)
+    # print(accuracy_tfidf)
 
     #################### EXECUTE ###########################
 
-    print("***test***")
-    df2 = pd.read_csv('Test.csv',encoding='latin-1')
-    # temp = df2['SentimentText'].apply(
-    #     lambda x: " ".join([stemmer.stem(i) for i in re.sub("[^a-zA-Z]", " ", x).split() if i not in words]).lower())
-    temp = np.array(pre.getData(df2['SentimentText'].array))
-    test_tfIdf2 = vectorizer_tfidf.transform(temp.astype('U'))
-    # test_x = temp
-    # test_tfIdf2 = vectorizer_tfidf.transform(test_x.values.astype('U'))
-    # pred_test=nb_classifier.predict(test_tfIdf2)
-    pred_test = lr_classifier.predict(test_tfIdf2)
-    df2['SentimentText'] = pred_test
-    df2.columns = ['ID','Sentiment']
-    df2.to_csv("results7.csv",index=False)
+    # print("***test***")
+    # df2 = pd.read_csv('Test.csv',encoding='latin-1')
+    # # temp = df2['SentimentText'].apply(
+    # #     lambda x: " ".join([stemmer.stem(i) for i in re.sub("[^a-zA-Z]", " ", x).split() if i not in words]).lower())
+    # temp = np.array(pre.getData(df2['SentimentText'].array))
+    # test_tfIdf2 = vectorizer_tfidf.transform(temp.astype('U'))
+    # # test_x = temp
+    # # test_tfIdf2 = vectorizer_tfidf.transform(test_x.values.astype('U'))
+    # # pred_test=nb_classifier.predict(test_tfIdf2)
+    # pred_test = lr_classifier.predict(test_tfIdf2)
+    # df2['SentimentText'] = pred_test
+    # df2.columns = ['ID','Sentiment']
+    # df2.to_csv("results8.csv",index=False)
 
 
 
