@@ -19,7 +19,9 @@ def lower_case_review(review):
     new_review=""
     lower_case_tokens=[]
     words = str.split(review)
+    # string_check= re.compile("[',@_!#$%.``^&*()<>?/\|}{""~:]")
     string_check= re.compile("[',@_!#$%.``^&*()<>?/\|}{""~:]")
+
     for token in words:
         token =token.lower()
         if(string_check.search(token)==None):
