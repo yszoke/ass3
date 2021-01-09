@@ -32,7 +32,6 @@ from nltk.corpus import sentiwordnet as swn
 import matplotlib.pyplot as plt
 from nltk.tokenize import word_tokenize
 from nltk.util import ngrams
-import pandas
 from sklearn import model_selection
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
@@ -47,21 +46,22 @@ from sklearn import metrics
 from sklearn.linear_model import Perceptron
 
 import Preprocessing as pre
-# from word2vec import execute
+import word2vec
 def test():
 
     df = pd.read_csv('Train.csv',encoding='latin-1')
 ################################################################
-    df['length'] = check_happy(df['SentimentText'].values)
-
+    df['symbols'] = symbols(df['SentimentText'].values)
+    df['length'] = df['SentimentText'].str.len()
+    word_train,word_test=word2vec.exe()
     df['processedtext'] = np.array(pre.getData(df['SentimentText'].array))
-    # word2vec_train, word2vec_test=execute()
     target = df['Sentiment']
 
 ################################################################
 
     X_train, X_test, y_train, y_test = train_test_split(df['processedtext'], target, test_size=0.20, random_state=100)
-    X_train2, X_test2, y_train2, y_test2 = train_test_split(df['length'], target, test_size=0.20, random_state=100)
+    X_train2, X_test2, y_train2, y_test2 = train_test_split(df['symbols'], target, test_size=0.20, random_state=100)
+    X_train3, X_test3, y_train3, y_test3 = train_test_split(word_train, target, test_size=0.20, random_state=100)
 
     # 3 types of vectorizer
     vectorizer_tfidf = TfidfVectorizer(stop_words='english', max_df=0.75, ngram_range=(1, 2),analyzer='word',strip_accents="ascii")
@@ -90,6 +90,17 @@ def test():
     print("train tf idf shape: ",train_tfIdf.shape)
     print("test tf idf shape: ",test_tfIdf.shape,"\n")
 
+    num_feats = X_train3.values
+    num_feats2 = X_test3.values
+
+    train_tfIdf = hstack((train_tfIdf, num_feats))
+    test_tfIdf = hstack((test_tfIdf, num_feats2))
+
+    # train_tfIdf = hstack((train_tfIdf, np.array(X_train3)[:, None]))
+    # test_tfIdf = hstack((test_tfIdf, np.array(X_test3)[:, None]))
+
+    print("train tf idf shape: ", train_tfIdf.shape)
+    print("test tf idf shape: ", test_tfIdf.shape, "\n")
     ################################################################
     scoring = 'accuracy'
     seed = 7
@@ -98,7 +109,7 @@ def test():
     models = []
     models.append(('LR', LogisticRegression(solver='liblinear')))
     # models.append(('KNN', KNeighborsClassifier()))
-    # models.append(('RFC', RandomForestClassifier(n_estimators=10, criterion='entropy', random_state=100)))
+    models.append(('RFC', RandomForestClassifier(n_estimators=10, criterion='entropy', random_state=100)))
 
     results = []
     names = []
@@ -155,18 +166,22 @@ def test():
 
     print("***test***")
     df2 = pd.read_csv('Test.csv',encoding='latin-1')
-    df2['length'] = check_happy(df2['SentimentText'].values)
+    df2['symbols'] = symbols(df2['SentimentText'].values)
     temp = np.array(pre.getData(df2['SentimentText'].array))
     test_tfIdf2 = vectorizer_hash.transform(temp.astype('U'))
 
     # df2['length'] = df2['SentimentText'].str.len()
-    test_tfIdf2 = hstack((test_tfIdf2, np.array(df2['length'])[:, None]))
+    test_tfIdf2 = hstack((test_tfIdf2, np.array(df2['symbols'])[:, None]))
+    # test_tfIdf2 = hstack((test_tfIdf2, np.array(df2['length'])[:, None]))
+
+    num_feats3 = word_test.values
+    test_tfIdf2 = hstack((test_tfIdf2, num_feats3))
 
     # test_x = temp
     # test_tfIdf2 = vectorizer_tfidf.transform(test_x.values.astype('U'))
     pred_test = lr_classifier.predict(test_tfIdf2)
     df2['SentimentText'] = pred_test
-    del df2['length']
+    del df2['symbols']
     df2.columns = ['ID','Sentiment']
     df2.to_csv("results15.csv",index=False)
 
@@ -174,7 +189,7 @@ def test():
     print(Conf_metrics_tfidf,"\n")
 
 
-def check_happy(ndarray):
+def symbols(ndarray):
 
     lines = ['\\',",", '`', '*', '_', '{', '}', '[', ']','&','/','?','~',':','^',
                        '(', ')', '>','<', '#', '+', '-', '.', '!', '$', '\'']
